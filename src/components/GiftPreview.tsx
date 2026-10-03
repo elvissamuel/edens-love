@@ -1,10 +1,21 @@
-import Link from "next/link";
-import { FadeIn, SectionHeading } from "@/components/FadeIn";
-import { initialGifts } from "@/data/content";
+"use client";
 
-const previewGifts = initialGifts.slice(0, 3);
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { FadeIn, SectionHeading } from "@/components/FadeIn";
+import type { GiftRecord } from "@/types";
 
 export function GiftPreview() {
+  const [gifts, setGifts] = useState<GiftRecord[]>([]);
+
+  useEffect(() => {
+    void fetch("/api/gifts", { cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload: { gifts: GiftRecord[] }) =>
+        setGifts((payload.gifts ?? []).slice(0, 3)),
+      );
+  }, []);
+
   return (
     <section id="gifts" className="px-5 py-24 sm:py-32">
       <FadeIn>
@@ -15,7 +26,7 @@ export function GiftPreview() {
         />
       </FadeIn>
       <div className="mx-auto mt-12 grid max-w-5xl gap-4 sm:grid-cols-3">
-        {previewGifts.map((gift, index) => (
+        {gifts.map((gift, index) => (
           <FadeIn key={gift.id} delay={index * 0.06}>
             <article className="overflow-hidden rounded-3xl border border-gold/25 bg-white">
               <img

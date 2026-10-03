@@ -8,7 +8,7 @@ import { wedding } from "@/data/content";
 export const metadata: Metadata = {
   title: `Gift list — ${wedding.partnerOne} & ${wedding.partnerTwo}`,
   description:
-    "A living list of gifts for Omodolapo and Omotehinse. Mark what has already been received so others know what is still needed.",
+    "Gifts for Omodolapo and Omotehinse. Transfer to Palmpay or send a WhatsApp message to give an item from the list.",
 };
 
 export default function GiftsPage() {

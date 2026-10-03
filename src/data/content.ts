@@ -2,11 +2,16 @@ export const wedding = {
   siteName: "Eden's Love",
   partnerOne: "Omodolapo",
   partnerTwo: "Omotehinse",
-  isoDate: "2026-11-26T15:00:00+01:00",
+  isoDate: "2026-11-26T08:00:00+01:00",
   displayDate: "Thursday, 26 November 2026",
-  time: "2:00 PM",
-  receptionTime: "Reception to follow",
+  time: "8:00 AM",
+  receptionTime: "2:00 PM",
   dressCode: "Garden formal — burgundy, gold, and white welcome",
+  schedule: [
+    { label: "Engagement", value: "8:00 AM" },
+    { label: "Church", value: "10:30 AM" },
+    { label: "Reception", value: "2:00 PM" },
+  ],
   venue: {
     name: "Asup Hall",
     address: "The Federal Polytechnic Ilaro, PMB 50, Ilaro",
@@ -22,6 +27,7 @@ export const wedding = {
   story: {
     kicker: "Our story",
     title: "A quiet beginning, a lifetime ahead",
+    toldBy: "As told by the groom, Omotehinse",
     teaser: [
       "I'll leave the story of how we met for another day. For now, let me tell you about a particularly rainy Thursday evening where I finally had the guts to ask her out. Prior to this fateful day, I had told her that I owed her Shawarma and I'd love it if she gave me the privilege to fulfil my promise by taking her out; I'm sure you already know this had nothing to do with Shawarma.",
     ],
@@ -45,6 +51,12 @@ export const wedding = {
     { src: "/photos/06.jpg", alt: "The couple among friends and flowers" },
     { src: "/photos/07.jpg", alt: "A close, loving glance between them" },
   ],
+  giving: {
+    accountName: "Palmpay",
+    accountNumber: "8130857869",
+    whatsapp: "2348165840400",
+    whatsappDisplay: "+234 816 584 0400",
+  },
 } as const;
 
 export const initialGifts = [
@@ -53,7 +65,7 @@ export const initialGifts = [
     name: "65-inch smart TV",
     detail: "A large living-room television for films, matches, and slow evenings in.",
     hint: "For the home they are building together",
-    image: "/gifts/tv.jpg",
+    image: "/gifts/tv-65inch.jpg",
   },
   {
     id: "ac",
@@ -95,7 +107,7 @@ export const initialGifts = [
     name: "12kg gas cylinder",
     detail: "A 12kg cooking-gas cylinder for the kitchen.",
     hint: "So the stove is never waiting",
-    image: "/gifts/gas-cylinder.jpg",
+    image: "/gifts/gas-cyliner.png",
   },
   {
     id: "inverter",
@@ -110,5 +122,40 @@ export const initialGifts = [
     detail: "Pots, pans, and a kettle-ready set for everyday cooking.",
     hint: "The first meals of a marriage",
     image: "/gifts/cookware.jpg",
+  },
+  {
+    id: "toaster",
+    name: "Toaster",
+    detail: "A two-slice toaster for quick breakfasts.",
+    hint: "Mornings, made simple",
+    image: "/gifts/toaster.jpg",
+  },
+  {
+    id: "air-fryer",
+    name: "Air fryer",
+    detail: "A compact air fryer for crisp meals with less oil.",
+    hint: "Weeknight dinners, sorted",
+    image: "/gifts/air-fryer.jpg",
+  },
+  {
+    id: "water-dispenser",
+    name: "Water dispenser",
+    detail: "A standing dispenser for hot and cold drinking water.",
+    hint: "Always a glass within reach",
+    image: "/gifts/water-dispenser.jpg",
+  },
+  {
+    id: "ironing-board",
+    name: "Ironing board",
+    detail: "A sturdy ironing board for the new home.",
+    hint: "A practical kindness",
+    image: "/gifts/ironing-board.jpg",
+  },
+  {
+    id: "electric-kettle",
+    name: "Electric kettle",
+    detail: "A stainless steel kettle for tea, coffee, and noodles.",
+    hint: "How every good conversation begins",
+    image: "/gifts/electric-kettle.jpg",
   },
 ] as const;

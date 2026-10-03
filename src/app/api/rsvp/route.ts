@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { addRsvp } from "@/lib/store";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as {
@@ -27,15 +26,39 @@ export async function POST(request: Request) {
     );
   }
 
-  const guests = Math.min(8, Math.max(1, Number(body.guests) || 1));
+  const scriptUrl = process.env.GOOGLE_APPS_SCRIPT_URL;
+  if (!scriptUrl) {
+    return NextResponse.json(
+      { error: "RSVP is not connected yet. Please try again soon." },
+      { status: 503 },
+    );
+  }
 
-  const rsvp = await addRsvp({
+  const guests = body.attending
+    ? Math.min(8, Math.max(1, Number(body.guests) || 1))
+    : 0;
+
+  const payload = {
     name,
     email,
     attending: body.attending,
-    guests: body.attending ? guests : 0,
+    guests,
     message: body.message?.trim() ?? "",
+  };
+
+  const response = await fetch(scriptUrl, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+    redirect: "follow",
   });
 
-  return NextResponse.json({ rsvp });
+  if (!response.ok) {
+    return NextResponse.json(
+      { error: "We could not save your reply. Please try again." },
+      { status: 502 },
+    );
+  }
+
+  return NextResponse.json({ ok: true });
 }

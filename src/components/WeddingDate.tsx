@@ -3,8 +3,7 @@ import { FadeIn, SectionHeading } from "@/components/FadeIn";
 
 const details = [
   { label: "The date", value: wedding.displayDate },
-  { label: "The hour", value: wedding.time },
-  { label: "Afterward", value: wedding.receptionTime },
+  ...wedding.schedule,
   { label: "Attire", value: wedding.dressCode },
 ];
 

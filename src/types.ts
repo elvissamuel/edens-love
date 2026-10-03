@@ -4,6 +4,8 @@ export type GiftRecord = {
   detail: string;
   hint: string;
   image: string;
+  price: number | null;
+  draft: boolean;
   claimed: boolean;
   claimedBy: string | null;
   claimedAt: string | null;

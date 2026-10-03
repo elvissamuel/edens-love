@@ -31,6 +31,9 @@ export default function OurStoryPage() {
               title={wedding.story.title}
               subtitle="A rainy Thursday, a walk to Ojota, and a question asked under the lights of an MRS filling station."
             />
+            <p className="mt-6 text-center font-sans text-[0.72rem] uppercase tracking-[0.32em] text-burgundy">
+              {wedding.story.toldBy}
+            </p>
           </FadeIn>
         </section>
 
@@ -59,13 +62,21 @@ export default function OurStoryPage() {
                   <img
                     src={photo.src}
                     alt={photo.alt}
-                    className="h-64 w-full rounded-[1.75rem] object-cover object-center shadow-[0_16px_40px_rgba(74,16,32,0.12)] sm:h-80"
+                    className="h-64 w-full rounded-[1.75rem] object-cover object-center md:object-[center_25%] shadow-[0_16px_40px_rgba(74,16,32,0.12)] sm:h-80 lg:h-[520px]"
                   />
                 </FadeIn>
               ) : null}
             </div>
             );
           })}
+          <FadeIn>
+            <p className="pt-4 text-right font-serif text-xl italic text-burgundy">
+              — Omotehinse
+            </p>
+            <p className="mt-1 text-right font-sans text-[0.68rem] uppercase tracking-[0.24em] text-gold-deep">
+              The groom
+            </p>
+          </FadeIn>
         </article>
 
         <FadeIn className="mt-16 px-5 text-center">

@@ -1,36 +1,60 @@
 import { promises as fs } from "fs";
 import path from "path";
 import { initialGifts } from "@/data/content";
-import type { GiftRecord, RsvpRecord } from "@/types";
+import { postToAppsScript } from "@/lib/apps-script";
+import type { GiftRecord } from "@/types";
 
-export type { GiftRecord, RsvpRecord };
+export type { GiftRecord };
 
 const dataDir = path.join(process.cwd(), "data");
 const giftsPath = path.join(dataDir, "gifts.json");
-const rsvpsPath = path.join(dataDir, "rsvps.json");
 
-async function ensureDataFiles() {
-  await fs.mkdir(dataDir, { recursive: true });
+type GiftOverlay = Pick<
+  GiftRecord,
+  "id" | "price" | "draft" | "claimed" | "claimedBy" | "claimedAt"
+>;
 
+async function readLocalOverlay(): Promise<GiftOverlay[]> {
   try {
-    await fs.access(giftsPath);
+    const raw = await fs.readFile(giftsPath, "utf8");
+    return JSON.parse(raw) as GiftOverlay[];
   } catch {
-    await fs.writeFile(giftsPath, JSON.stringify(catalogGifts(), null, 2));
-  }
-
-  try {
-    await fs.access(rsvpsPath);
-  } catch {
-    await fs.writeFile(rsvpsPath, JSON.stringify([], null, 2));
+    return [];
   }
 }
 
-function catalogGifts(existing: GiftRecord[] = []): GiftRecord[] {
-  const byId = new Map(existing.map((gift) => [gift.id, gift]));
+async function writeLocalOverlay(gifts: GiftRecord[]) {
+  await fs.mkdir(dataDir, { recursive: true });
+  const overlay: GiftOverlay[] = gifts.map((gift) => ({
+    id: gift.id,
+    price: gift.price,
+    draft: gift.draft,
+    claimed: gift.claimed,
+    claimedBy: gift.claimedBy,
+    claimedAt: gift.claimedAt,
+  }));
+  await fs.writeFile(giftsPath, JSON.stringify(overlay, null, 2));
+}
+
+async function readRemoteOverlay(): Promise<GiftOverlay[] | null> {
+  const payload = await postToAppsScript({ type: "gift-list" });
+  if (!payload || payload.ok === false || !Array.isArray(payload.gifts)) {
+    return null;
+  }
+  return payload.gifts as GiftOverlay[];
+}
+
+function mergeGifts(overlay: GiftOverlay[] = []): GiftRecord[] {
+  const byId = new Map(overlay.map((gift) => [gift.id, gift]));
   return initialGifts.map((gift) => {
     const current = byId.get(gift.id);
     return {
       ...gift,
+      price:
+        typeof current?.price === "number" && Number.isFinite(current.price)
+          ? current.price
+          : null,
+      draft: current?.draft ?? false,
       claimed: current?.claimed ?? false,
       claimedBy: current?.claimedBy ?? null,
       claimedAt: current?.claimedAt ?? null,
@@ -38,59 +62,53 @@ function catalogGifts(existing: GiftRecord[] = []): GiftRecord[] {
   });
 }
 
-export async function readGifts(): Promise<GiftRecord[]> {
-  await ensureDataFiles();
-  const raw = await fs.readFile(giftsPath, "utf8");
-  const stored = JSON.parse(raw) as GiftRecord[];
-  const gifts = catalogGifts(stored);
-  const changed =
-    stored.length !== gifts.length ||
-    stored.some((gift, index) => gift.id !== gifts[index]?.id || gift.image !== gifts[index]?.image);
-  if (changed) {
-    await fs.writeFile(giftsPath, JSON.stringify(gifts, null, 2));
-  }
-  return gifts;
+export async function readGifts(includeDrafts = false): Promise<GiftRecord[]> {
+  const local = await readLocalOverlay();
+  const remote = await readRemoteOverlay();
+  const overlay = remote && remote.length > 0 ? remote : local;
+  const gifts = mergeGifts(overlay);
+  await writeLocalOverlay(gifts);
+  return includeDrafts ? gifts : gifts.filter((gift) => !gift.draft);
 }
 
-export async function writeGifts(gifts: GiftRecord[]) {
-  await ensureDataFiles();
-  await fs.writeFile(giftsPath, JSON.stringify(gifts, null, 2));
-}
-
-export async function toggleGift(id: string, claimedBy?: string) {
-  const gifts = await readGifts();
+export async function updateGift(
+  id: string,
+  patch: Partial<Pick<GiftRecord, "price" | "draft" | "claimed" | "claimedBy">>,
+) {
+  const gifts = await readGifts(true);
   const index = gifts.findIndex((gift) => gift.id === id);
   if (index === -1) return null;
 
   const current = gifts[index];
-  const nextClaimed = !current.claimed;
   gifts[index] = {
     ...current,
-    claimed: nextClaimed,
-    claimedBy: nextClaimed ? (claimedBy?.trim() || "A loved one") : null,
-    claimedAt: nextClaimed ? new Date().toISOString() : null,
+    price:
+      patch.price === undefined
+        ? current.price
+        : patch.price === null || Number.isNaN(patch.price)
+          ? null
+          : patch.price,
+    draft: patch.draft ?? current.draft,
+    claimed: patch.claimed ?? current.claimed,
+    claimedBy:
+      patch.claimedBy === undefined ? current.claimedBy : patch.claimedBy,
+    claimedAt: patch.claimed
+      ? new Date().toISOString()
+      : patch.claimed === false
+        ? null
+        : current.claimedAt,
   };
 
-  await writeGifts(gifts);
-  return gifts[index];
-}
-
-export async function readRsvps(): Promise<RsvpRecord[]> {
-  await ensureDataFiles();
-  const raw = await fs.readFile(rsvpsPath, "utf8");
-  return JSON.parse(raw) as RsvpRecord[];
-}
-
-export async function addRsvp(
-  input: Omit<RsvpRecord, "id" | "createdAt">,
-): Promise<RsvpRecord> {
-  const rsvps = await readRsvps();
-  const record: RsvpRecord = {
-    ...input,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  };
-  rsvps.push(record);
-  await fs.writeFile(rsvpsPath, JSON.stringify(rsvps, null, 2));
-  return record;
+  const updated = gifts[index];
+  await writeLocalOverlay(gifts);
+  await postToAppsScript({
+    type: "gift-update",
+    id: updated.id,
+    price: updated.price,
+    draft: updated.draft,
+    claimed: updated.claimed,
+    claimedBy: updated.claimedBy,
+    claimedAt: updated.claimedAt,
+  });
+  return updated;
 }
