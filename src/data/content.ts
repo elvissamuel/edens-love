@@ -5,11 +5,11 @@ export const wedding = {
   isoDate: "2026-11-26T08:00:00+01:00",
   displayDate: "Thursday, 26 November 2026",
   time: "8:00 AM",
-  receptionTime: "2:00 PM",
+  receptionTime: "1:00 PM",
   dressCode: "Garden formal — burgundy, gold, and white welcome",
   schedule: [
-    { label: "Engagement", value: "8:00 AM" },
-    { label: "Church", value: "10:30 AM" },
+    // { label: "Engagement", value: "8:00 AM" },
+    { label: "Church", value: "11:00 AM" },
     { label: "Reception", value: "2:00 PM" },
   ],
   venue: {
