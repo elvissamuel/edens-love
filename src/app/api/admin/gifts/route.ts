@@ -25,14 +25,21 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Gift id is required." }, { status: 400 });
   }
 
-  const gift = await updateGift(body.id, {
-    price: body.price,
-    draft: body.draft,
-  });
+  try {
+    const gift = await updateGift(body.id, {
+      price: body.price,
+      draft: body.draft,
+    });
 
-  if (!gift) {
-    return NextResponse.json({ error: "Gift not found." }, { status: 404 });
+    if (!gift) {
+      return NextResponse.json({ error: "Gift not found." }, { status: 404 });
+    }
+
+    return NextResponse.json({ gift });
+  } catch {
+    return NextResponse.json(
+      { error: "Could not save this gift. Check that the Google Sheet script is deployed." },
+      { status: 502 },
+    );
   }
-
-  return NextResponse.json({ gift });
 }

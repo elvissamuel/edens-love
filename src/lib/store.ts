@@ -24,16 +24,21 @@ async function readLocalOverlay(): Promise<GiftOverlay[]> {
 }
 
 async function writeLocalOverlay(gifts: GiftRecord[]) {
-  await fs.mkdir(dataDir, { recursive: true });
-  const overlay: GiftOverlay[] = gifts.map((gift) => ({
-    id: gift.id,
-    price: gift.price,
-    draft: gift.draft,
-    claimed: gift.claimed,
-    claimedBy: gift.claimedBy,
-    claimedAt: gift.claimedAt,
-  }));
-  await fs.writeFile(giftsPath, JSON.stringify(overlay, null, 2));
+  if (process.env.VERCEL) return;
+  try {
+    await fs.mkdir(dataDir, { recursive: true });
+    const overlay: GiftOverlay[] = gifts.map((gift) => ({
+      id: gift.id,
+      price: gift.price,
+      draft: gift.draft,
+      claimed: gift.claimed,
+      claimedBy: gift.claimedBy,
+      claimedAt: gift.claimedAt,
+    }));
+    await fs.writeFile(giftsPath, JSON.stringify(overlay, null, 2));
+  } catch {
+    // Serverless filesystems are read-only; Google Sheets is the store there.
+  }
 }
 
 async function readRemoteOverlay(): Promise<GiftOverlay[] | null> {
@@ -101,7 +106,7 @@ export async function updateGift(
 
   const updated = gifts[index];
   await writeLocalOverlay(gifts);
-  await postToAppsScript({
+  const remote = await postToAppsScript({
     type: "gift-update",
     id: updated.id,
     price: updated.price,
@@ -110,5 +115,8 @@ export async function updateGift(
     claimedBy: updated.claimedBy,
     claimedAt: updated.claimedAt,
   });
+  if (process.env.VERCEL && remote?.ok !== true) {
+    throw new Error("Could not save the gift to Google Sheets.");
+  }
   return updated;
 }
