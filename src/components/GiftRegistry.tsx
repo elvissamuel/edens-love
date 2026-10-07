@@ -49,11 +49,11 @@ export function GiftRegistry() {
         <p className="font-sans text-[0.68rem] uppercase tracking-[0.24em] text-gold-deep">
           Give a gift
         </p>
-        <p className="mt-3 font-serif text-2xl text-ink">
-          {wedding.giving.accountName} · {wedding.giving.accountNumber}
-        </p>
+        <p className="mt-3 font-serif text-2xl text-ink">{wedding.giving.bank}</p>
+        <p className="mt-1 font-serif text-2xl text-ink">{wedding.giving.accountNumber}</p>
+        <p className="mt-1 font-sans text-sm text-ink">{wedding.giving.accountName}</p>
         <p className="mt-3 font-sans text-sm leading-6 text-ink-muted">
-          Transfer to this Palmpay account and put the <strong className="font-medium text-ink">item name in the description</strong>, or chat on WhatsApp.
+          Transfer to this UBA account and put the <strong className="font-medium text-ink">item name in the description</strong>, or chat on WhatsApp.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button

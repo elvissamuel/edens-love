@@ -52,8 +52,9 @@ export const wedding = {
     { src: "/photos/07.jpg", alt: "A close, loving glance between them" },
   ],
   giving: {
-    accountName: "Palmpay",
-    accountNumber: "8130857869",
+    bank: "UBA",
+    accountNumber: "2212112359",
+    accountName: "Deborah Dolapo Ibikunle",
     whatsapp: "2348165840400",
     whatsappDisplay: "+234 816 584 0400",
   },
